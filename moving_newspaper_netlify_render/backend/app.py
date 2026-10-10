@@ -228,7 +228,11 @@ def cloudinary_upload(gif_path):
 
 @app.get("/health")
 def health():
-    return jsonify({"ok": True})
+    return jsonify({
+        "ok": True,
+        "version": "text-title-v2",
+        "headline": "즐거움 만수두룩 / 수리산 마법학교"
+    })
 
 @app.post("/generate")
 def generate():
