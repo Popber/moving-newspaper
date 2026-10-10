@@ -16,7 +16,8 @@ CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME", "fhbtcmuv")
 UPLOAD_PRESET = os.environ.get("CLOUDINARY_UPLOAD_PRESET", "moving_newspaper")
 
 W, H = 700, 1000
-PHOTO_BOX = (215, 365, 485, 568)
+# Slightly smaller and more centered photo area so the moving image sits neatly inside the frame
+PHOTO_BOX = (245, 405, 455, 565)
 
 def font(size, bold=False):
     candidates = [
@@ -47,8 +48,8 @@ F_MAST = font(58, True)
 F_CAP = font(15)
 F_STAMP = font(20, True)
 
-KF_HEAD_BIG = kfont(62, True)
-KF_SUB = kfont(25, True)
+KF_HEAD_BIG = kfont(50, True)
+KF_SUB = kfont(24, True)
 
 def draw_wrapped(draw, text, xy, width_px, font_obj, fill, line_gap=4, max_lines=8):
     x, y = xy
@@ -112,30 +113,29 @@ def static_newspaper(name=""):
     d.text((W - 44, 124), "OCTOBER 17, 2026", font=F_SMALL, fill=ink, anchor="ra")
     d.line((40, 150, W - 40, 150), fill=ink, width=1)
 
-    # ★ 포스터 이미지 없이 텍스트만 사용
-    d.text((W // 2, 185), "즐거움", font=KF_HEAD_BIG, fill=ink, anchor="ma")
-    d.text((W // 2, 255), "만수두룩", font=KF_HEAD_BIG, fill=ink, anchor="ma")
+    # Single-line main headline + subtitle
+    d.text((W // 2, 255), "즐거움만수두룩", font=KF_HEAD_BIG, fill=ink, anchor="ma")
     d.text((W // 2, 315), "수리산 마법학교", font=KF_SUB, fill=ink, anchor="ma")
-    d.line((40, 345, W - 40, 345), fill=ink, width=1)
+    d.line((40, 360, W - 40, 360), fill=ink, width=1)
 
     # Side columns
-    d.text((45, 370), "Mysterious News", font=F_BODY_B, fill=ink)
-    d.line((45, 397, 195, 397), fill=ink, width=1)
+    d.text((45, 390), "Mysterious News", font=F_BODY_B, fill=ink)
+    d.line((45, 417, 195, 417), fill=ink, width=1)
     left = (
         "A remarkable figure appeared at the Surisan festival, drawing visitors "
         "into an atmosphere of magic, performance and imagination. Witnesses "
         "said the living portrait looked as if it had stepped straight out of an old newspaper."
     )
-    draw_wrapped(d, left, (45, 410), 145, F_BODY, ink, 3, 13)
+    draw_wrapped(d, left, (45, 430), 145, F_BODY, ink, 3, 13)
 
-    d.text((505, 370), "Daily Magic", font=F_BODY_B, fill=ink)
-    d.line((505, 397, 655, 397), fill=ink, width=1)
+    d.text((505, 390), "Daily Magic", font=F_BODY_B, fill=ink)
+    d.line((505, 417, 655, 417), fill=ink, width=1)
     right = (
         "Editors requested a lively pose worthy of a magical special issue. "
         "Every gesture added charm to the moving portrait and gave the page "
         "the feeling of an enchanted bulletin."
     )
-    draw_wrapped(d, right, (505, 410), 145, F_BODY, ink, 3, 13)
+    draw_wrapped(d, right, (505, 430), 145, F_BODY, ink, 3, 13)
 
     # Photo frame
     x1, y1, x2, y2 = PHOTO_BOX
@@ -143,7 +143,7 @@ def static_newspaper(name=""):
 
     # Caption
     cap = f"{name} — Featured wizard at Surisan Magic School." if name else "Featured wizard at Surisan Magic School."
-    d.text((W // 2, 582), cap, font=F_CAP, fill=ink, anchor="ma")
+    d.text((W // 2, 585), cap, font=F_CAP, fill=ink, anchor="ma")
 
     # Bottom articles
     d.line((40, 615, W - 40, 615), fill=ink, width=1)
@@ -230,8 +230,9 @@ def cloudinary_upload(gif_path):
 def health():
     return jsonify({
         "ok": True,
-        "version": "text-title-v2",
-        "headline": "즐거움 만수두룩 / 수리산 마법학교"
+        "version": "text-title-v3",
+        "headline": "즐거움만수두룩 / 수리산 마법학교",
+        "photo_box": PHOTO_BOX
     })
 
 @app.post("/generate")
@@ -250,20 +251,13 @@ def generate():
 
             frames_dir = td / "frames"
             frames_dir.mkdir()
-
             frames = extract_frames(src, frames_dir)
 
             out = td / f"{uid}.gif"
             compose_gif(frames, out, name)
-
             gif_url, download_url = cloudinary_upload(out)
 
-        return jsonify({
-            "ok": True,
-            "gif_url": gif_url,
-            "download_url": download_url
-        })
-
+        return jsonify({"ok": True, "gif_url": gif_url, "download_url": download_url})
     except subprocess.CalledProcessError as e:
         msg = e.stderr.decode("utf-8", "ignore")[-1500:] if e.stderr else str(e)
         return jsonify({"error": "FFmpeg 처리 실패", "detail": msg}), 500
