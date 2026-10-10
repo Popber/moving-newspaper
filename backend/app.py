@@ -127,18 +127,18 @@ def static_newspaper(name=""):
     # Single-line festival headline, automatically shrunk to avoid clipping
     headline_text = "즐거움만수두룩"
     headline_font = fit_korean_font(d, headline_text, max_width=500, start_size=62, min_size=40)
-    d.text(
-        (W // 2, 195),
-        headline_text,
-        font=headline_font,
-        fill=ink,
-        anchor="ma",
-        stroke_width=1,
-        stroke_fill=ink
-    )
-    d.text((W // 2, 250), "수리산 마법학교", font=KF_SUB, fill=ink, anchor="ma")
-    d.line((165, 270, 535, 270), fill=ink, width=1)
-    d.line((40, 295, W - 40, 295), fill=ink, width=1)
+d.text(
+    (W // 2, 182),
+    headline_text,
+    font=headline_font,
+    fill=ink,
+    anchor="ma",
+    stroke_width=1,
+    stroke_fill=ink
+)
+d.text((W // 2, 235), "수리산 마법학교", font=KF_SUB, fill=ink, anchor="ma")
+d.line((165, 255, 535, 255), fill=ink, width=1)
+d.line((40, 282, W - 40, 282), fill=ink, width=1)
 
     # Side columns
     d.text((45, 325), "Mysterious News", font=F_BODY_B, fill=ink)
