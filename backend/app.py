@@ -190,3 +190,80 @@ def extract_frames(video_path, frame_dir):
         raise RuntimeError("영상 프레임을 추출하지 못했습니다.")
     while len(frames) < 8:
         frames.append(frames[-1])
+    return frames[:8]
+
+def compose_gif(frame_files, output_path, name):
+    base = static_newspaper(name)
+    x1, y1, x2, y2 = PHOTO_BOX
+    target = (x2 - x1, y2 - y1)
+    pages = []
+    for fp in frame_files:
+        portrait = Image.open(fp).convert("RGB")
+        portrait = cover(portrait, target)
+        page = base.copy()
+        page.paste(portrait, (x1, y1))
+        pages.append(page.convert("P", palette=Image.Palette.ADAPTIVE, colors=128))
+    pages[0].save(
+        output_path,
+        save_all=True,
+        append_images=pages[1:],
+        duration=150,
+        loop=0,
+        disposal=2,
+        optimize=False
+    )
+
+def cloudinary_upload(gif_path):
+    endpoint = f"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/image/upload"
+    with open(gif_path, "rb") as f:
+        files = {"file": ("moving-newspaper.gif", f, "image/gif")}
+        data = {"upload_preset": UPLOAD_PRESET}
+        r = requests.post(endpoint, files=files, data=data, timeout=60)
+    if not r.ok:
+        raise RuntimeError(f"Cloudinary upload failed: {r.text}")
+    data = r.json()
+    secure = data["secure_url"]
+    download = secure.replace("/upload/", "/upload/fl_attachment/")
+    return secure, download
+
+@app.get("/health")
+def health():
+    return jsonify({
+        "ok": True,
+        "version": "text-title-v4",
+        "headline": "즐거움만수두룩 / 수리산 마법학교 (layout v4)",
+        "photo_box": PHOTO_BOX
+    })
+
+@app.post("/generate")
+def generate():
+    if "video" not in request.files:
+        return jsonify({"error": "video 파일이 없습니다."}), 400
+
+    name = (request.form.get("name") or "").strip()[:30]
+    uid = uuid.uuid4().hex[:10]
+
+    try:
+        with tempfile.TemporaryDirectory(prefix="movingnews_") as td:
+            td = Path(td)
+            src = td / f"{uid}.webm"
+            request.files["video"].save(src)
+
+            frames_dir = td / "frames"
+            frames_dir.mkdir()
+            frames = extract_frames(src, frames_dir)
+
+            out = td / f"{uid}.gif"
+            compose_gif(frames, out, name)
+            gif_url, download_url = cloudinary_upload(out)
+
+        return jsonify({"ok": True, "gif_url": gif_url, "download_url": download_url})
+    except subprocess.CalledProcessError as e:
+        msg = e.stderr.decode("utf-8", "ignore")[-1500:] if e.stderr else str(e)
+        return jsonify({"error": "FFmpeg 처리 실패", "detail": msg}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "10000"))
+    app.run(host="0.0.0.0", port=port)
