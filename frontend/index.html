@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>움직이는 신문 · 수리산 마법학교</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#17120e;color:#f6ead0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{max-width:1120px;margin:auto;padding:18px}
+h1{text-align:center;margin:0 0 6px}.sub{text-align:center;opacity:.82;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:minmax(340px,420px) 1fr;gap:18px}
+.card{background:#251c14;border:1px solid #5c4935;border-radius:18px;padding:16px;box-shadow:0 14px 36px rgba(0,0,0,.28)}
+.camera{position:relative;aspect-ratio:4/3;background:#000;border-radius:14px;overflow:hidden}
+video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1)}
+.count{position:absolute;inset:0;display:none;place-items:center;font:900 clamp(80px,22vw,150px) Arial;color:#fff;background:rgba(0,0,0,.2);text-shadow:0 5px 16px #000}
+.rec{position:absolute;top:12px;left:12px;display:none;background:#a2261e;padding:7px 10px;border-radius:999px;font-weight:800}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+button,a.btn{border:0;border-radius:11px;padding:12px 15px;font-weight:800;background:#e3c171;color:#24180f;box-shadow:0 4px 0 #785f3a;text-decoration:none;cursor:pointer}
+button.secondary,a.secondary{background:#eee4d0} button.danger{background:#963b2d;color:#fff}
+button:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+.status{margin-top:12px;padding:10px 12px;border-radius:9px;background:#17110c;font-size:14px;min-height:40px}
+label{display:block;font-size:13px;font-weight:800;margin-top:12px}
+input{width:100%;margin-top:6px;padding:10px;border-radius:9px;border:1px solid #705b44;background:#17110c;color:#fff}
+.note{font-size:13px;line-height:1.45;opacity:.82}
+.previewBox{min-height:540px;display:grid;place-items:center;background:#17110c;border-radius:12px;padding:12px}
+.previewBox img{max-width:100%;max-height:76vh;display:none;border:1px solid #6f5537;box-shadow:0 14px 35px rgba(0,0,0,.35)}
+.placeholder{text-align:center;opacity:.62;line-height:1.7}
+.result{display:none;margin-top:14px;border-top:1px dashed #705b44;padding-top:14px}
+.qrwrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:12px}
+#qr{background:#fff;padding:9px;border-radius:8px}
+.url{font-size:11px;word-break:break-all;background:#17110c;padding:9px;border-radius:8px;margin-top:8px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.previewBox{min-height:420px}}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>움직이는 신문</h1>
+<div class="sub">수리산 마법학교 · 전체 신문 GIF 서버 생성 버전</div>
+<div class="grid">
+<section class="card">
+<h2>① 촬영</h2>
+<div class="camera">
+<video id="camera" autoplay muted playsinline></video>
+<div id="count" class="count">3</div>
+<div id="rec" class="rec">● REC</div>
+</div>
+<div class="controls">
+<button id="start">카메라 켜기</button>
+<button id="shoot" disabled>3초 후 촬영</button>
+<button id="switch" class="secondary" disabled>카메라 전환</button>
+<button id="reset" class="danger" disabled>다시 촬영</button>
+</div>
+<div id="status" class="status">카메라를 켜주세요.</div>
+
+<label>참가자 이름 / 별명</label>
+<input id="name" maxlength="20" placeholder="예: 마법사 달므미">
+
+<div class="controls">
+<button id="make" disabled>전체 신문 GIF 만들기</button>
+</div>
+<p class="note">촬영은 휴대폰에서 하고, 무거운 신문 전체 GIF 합성은 Render 서버에서 처리합니다.</p>
+
+<div id="result" class="result">
+<h2>③ 결과</h2>
+<div class="controls">
+<a id="open" class="btn secondary" target="_blank" rel="noopener">GIF 열기</a>
+<a id="download" class="btn secondary" target="_blank" rel="noopener">GIF 저장</a>
+</div>
+<div class="qrwrap">
+<div id="qr"></div>
+<div>
+<strong>참가자용 QR</strong>
+<div class="note">QR을 스캔하면 완성된 전체 신문 GIF가 열립니다.</div>
+</div>
+</div>
+<div id="url" class="url"></div>
+</div>
+</section>
+
+<section class="card">
+<h2>② 완성본 미리보기</h2>
+<div class="previewBox">
+<div id="placeholder" class="placeholder">
+촬영 후 <b>전체 신문 GIF 만들기</b>를 누르면<br>
+해리포터풍 신문 전체가 움직이는 GIF로 생성됩니다.
+</div>
+<img id="finalGif" alt="완성된 움직이는 신문 GIF">
+</div>
+</section>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="./config.js"></script>
+<script>
+const BACKEND=(window.APP_CONFIG&&window.APP_CONFIG.BACKEND_URL||'').replace(/\/$/,'');
+const camera=document.getElementById('camera'),start=document.getElementById('start'),shoot=document.getElementById('shoot'),sw=document.getElementById('switch'),reset=document.getElementById('reset'),make=document.getElementById('make'),count=document.getElementById('count'),rec=document.getElementById('rec'),statusEl=document.getElementById('status'),nameInput=document.getElementById('name'),finalGif=document.getElementById('finalGif'),placeholder=document.getElementById('placeholder'),result=document.getElementById('result'),openLink=document.getElementById('open'),downloadLink=document.getElementById('download'),urlBox=document.getElementById('url');
+let stream=null,facing='user',blob=null,blobUrl=null;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const status=t=>statusEl.textContent=t;
+
+async function openCamera(){
+ try{
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){status('HTTPS 주소에서 열어주세요.');return}
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:960}},audio:false});
+  camera.srcObject=stream;await camera.play();shoot.disabled=false;sw.disabled=false;status('준비 완료!');
+ }catch(e){console.error(e);status('카메라 권한을 허용해주세요.');}
+}
+start.onclick=openCamera;
+sw.onclick=async()=>{facing=facing==='user'?'environment':'user';await openCamera()};
+
+function mime(){
+ const types=['video/mp4;codecs=h264','video/mp4','video/webm;codecs=vp8','video/webm'];
+ return types.find(x=>window.MediaRecorder&&MediaRecorder.isTypeSupported(x))||'';
+}
+
+shoot.onclick=async()=>{
+ if(!stream)return;
+ shoot.disabled=true;sw.disabled=true;make.disabled=true;reset.disabled=true;
+ count.style.display='grid';
+ for(let i=3;i>=1;i--){count.textContent=i;await sleep(850)}
+ count.textContent='📸';await sleep(200);count.style.display='none';
+
+ const W=320,H=240,c=document.createElement('canvas');c.width=W;c.height=H;
+ const ctx=c.getContext('2d');const cs=c.captureStream(15);let drawing=true;
+ function draw(){
+  if(!drawing)return;
+  ctx.save();
+  if(facing==='user'){ctx.translate(W,0);ctx.scale(-1,1)}
+  const vr=camera.videoWidth/camera.videoHeight,cr=W/H;
+  let sx=0,sy=0,swid=camera.videoWidth,shei=camera.videoHeight;
+  if(vr>cr){swid=camera.videoHeight*cr;sx=(camera.videoWidth-swid)/2}else{shei=camera.videoWidth/cr;sy=(camera.videoHeight-shei)/2}
+  ctx.drawImage(camera,sx,sy,swid,shei,0,0,W,H);
+  ctx.restore();requestAnimationFrame(draw);
+ } draw();
+
+ let r;const mt=mime();
+ try{r=mt?new MediaRecorder(cs,{mimeType:mt,videoBitsPerSecond:550000}):new MediaRecorder(cs)}catch(e){r=new MediaRecorder(cs)}
+ const chunks=[];r.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+ const stopped=new Promise(resolve=>r.onstop=resolve);
+ rec.style.display='block';status('1.2초 촬영 중...');
+ r.start();await sleep(1200);r.stop();drawing=false;rec.style.display='none';await stopped;
+ blob=new Blob(chunks,{type:r.mimeType||mt||'video/webm'});
+ if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl=URL.createObjectURL(blob);
+ make.disabled=false;reset.disabled=false;shoot.disabled=false;sw.disabled=false;
+ status('촬영 완료. 전체 신문 GIF를 만들 수 있습니다.');
+};
+
+reset.onclick=()=>{
+ blob=null;if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl=null;
+ finalGif.removeAttribute('src');finalGif.style.display='none';placeholder.style.display='block';result.style.display='none';
+ make.disabled=true;status('다시 촬영할 수 있습니다.');
+};
+
+make.onclick=async()=>{
+ if(!blob)return;
+ if(!BACKEND){status('config.js에 Render 백엔드 주소를 먼저 입력해주세요.');return}
+ make.disabled=true;status('서버에서 신문 전체 GIF를 만드는 중...');
+ try{
+  const fd=new FormData();
+  fd.append('video',blob,'capture.webm');
+  fd.append('name',nameInput.value.trim());
+  const res=await fetch(`${BACKEND}/generate`,{method:'POST',body:fd});
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.error||'생성 실패');
+
+  finalGif.src=data.gif_url;finalGif.style.display='block';placeholder.style.display='none';
+  result.style.display='block';openLink.href=data.gif_url;downloadLink.href=data.download_url||data.gif_url;
+  urlBox.textContent=data.gif_url;
+  const qr=document.getElementById('qr');qr.innerHTML='';
+  new QRCode(qr,{text:data.gif_url,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});
+  status('완성! 신문 전체 GIF가 생성되었습니다.');
+ }catch(e){console.error(e);status('생성 실패: '+e.message)}
+ finally{make.disabled=false}
+};
+</script>
+</body>
+</html>

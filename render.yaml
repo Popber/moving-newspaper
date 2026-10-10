@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: moving-newspaper-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    healthCheckPath: /health
+    envVars:
+      - key: CLOUDINARY_CLOUD_NAME
+        value: fhbtcmuv
+      - key: CLOUDINARY_UPLOAD_PRESET
+        value: moving_newspaper
