@@ -17,7 +17,7 @@ UPLOAD_PRESET = os.environ.get("CLOUDINARY_UPLOAD_PRESET", "moving_newspaper")
 
 W, H = 700, 1000
 # Slightly smaller and more centered photo area so the moving image sits neatly inside the frame
-PHOTO_BOX = (245, 405, 455, 565)
+PHOTO_BOX = (245, 385, 455, 545)
 
 def font(size, bold=False):
     candidates = [
@@ -44,11 +44,11 @@ F_SMALL = font(16)
 F_BODY = font(17)
 F_BODY_B = font(18, True)
 F_HEAD = font(38, True)
-F_MAST = font(58, True)
+F_MAST = font(50, True)
 F_CAP = font(15)
 F_STAMP = font(20, True)
 
-KF_HEAD_BIG = kfont(50, True)
+KF_HEAD_BIG = kfont(48, True)
 KF_SUB = kfont(24, True)
 
 def draw_wrapped(draw, text, xy, width_px, font_obj, fill, line_gap=4, max_lines=8):
@@ -106,36 +106,36 @@ def static_newspaper(name=""):
     ink = "#2b1e13"
 
     # Masthead
-    d.text((W // 2, 34), "THE YOUTH PROPHET", font=F_MAST, fill=ink, anchor="ma")
-    d.line((40, 105, W - 40, 105), fill=ink, width=2)
-    d.line((40, 112, W - 40, 112), fill=ink, width=1)
-    d.text((44, 124), "MAGICAL NEWS • FESTIVAL SPECIAL EDITION", font=F_SMALL, fill=ink)
-    d.text((W - 44, 124), "OCTOBER 17, 2026", font=F_SMALL, fill=ink, anchor="ra")
-    d.line((40, 150, W - 40, 150), fill=ink, width=1)
+    d.text((W // 2, 38), "THE YOUTH PROPHET", font=F_MAST, fill=ink, anchor="ma")
+    d.line((40, 95, W - 40, 95), fill=ink, width=2)
+    d.line((40, 102, W - 40, 102), fill=ink, width=1)
+    d.text((44, 114), "MAGICAL NEWS • FESTIVAL SPECIAL EDITION", font=F_SMALL, fill=ink)
+    d.text((W - 44, 114), "OCTOBER 17, 2026", font=F_SMALL, fill=ink, anchor="ra")
+    d.line((40, 140, W - 40, 140), fill=ink, width=1)
 
     # Single-line main headline + subtitle
-    d.text((W // 2, 255), "즐거움만수두룩", font=KF_HEAD_BIG, fill=ink, anchor="ma")
-    d.text((W // 2, 315), "수리산 마법학교", font=KF_SUB, fill=ink, anchor="ma")
-    d.line((40, 360, W - 40, 360), fill=ink, width=1)
+    d.text((W // 2, 215), "즐거움만수두룩", font=KF_HEAD_BIG, fill=ink, anchor="ma")
+    d.text((W // 2, 260), "수리산 마법학교", font=KF_SUB, fill=ink, anchor="ma")
+    d.line((40, 305, W - 40, 305), fill=ink, width=1)
 
     # Side columns
-    d.text((45, 390), "Mysterious News", font=F_BODY_B, fill=ink)
-    d.line((45, 417, 195, 417), fill=ink, width=1)
+    d.text((45, 330), "Mysterious News", font=F_BODY_B, fill=ink)
+    d.line((45, 357, 195, 357), fill=ink, width=1)
     left = (
         "A remarkable figure appeared at the Surisan festival, drawing visitors "
         "into an atmosphere of magic, performance and imagination. Witnesses "
         "said the living portrait looked as if it had stepped straight out of an old newspaper."
     )
-    draw_wrapped(d, left, (45, 430), 145, F_BODY, ink, 3, 13)
+    draw_wrapped(d, left, (45, 370), 145, F_BODY, ink, 3, 9)
 
-    d.text((505, 390), "Daily Magic", font=F_BODY_B, fill=ink)
-    d.line((505, 417, 655, 417), fill=ink, width=1)
+    d.text((505, 330), "Daily Magic", font=F_BODY_B, fill=ink)
+    d.line((505, 357, 655, 357), fill=ink, width=1)
     right = (
         "Editors requested a lively pose worthy of a magical special issue. "
         "Every gesture added charm to the moving portrait and gave the page "
         "the feeling of an enchanted bulletin."
     )
-    draw_wrapped(d, right, (505, 430), 145, F_BODY, ink, 3, 13)
+    draw_wrapped(d, right, (505, 370), 145, F_BODY, ink, 3, 9)
 
     # Photo frame
     x1, y1, x2, y2 = PHOTO_BOX
@@ -143,30 +143,30 @@ def static_newspaper(name=""):
 
     # Caption
     cap = f"{name} — Featured wizard at Surisan Magic School." if name else "Featured wizard at Surisan Magic School."
-    d.text((W // 2, 585), cap, font=F_CAP, fill=ink, anchor="ma")
+    d.text((W // 2, 562), cap, font=F_CAP, fill=ink, anchor="ma")
 
     # Bottom articles
-    d.line((40, 615, W - 40, 615), fill=ink, width=1)
-    d.text((45, 635), "Breaking Story", font=F_HEAD, fill=ink)
+    d.line((40, 610, W - 40, 610), fill=ink, width=1)
+    d.text((45, 625), "Breaking Story", font=F_HEAD, fill=ink)
     center = (
         "This special moving newspaper preserves a short festival moment as a looping image. "
         "The vintage page combines old paper texture, classic editorial columns and a custom festival headline "
         "to create a one-of-a-kind magical souvenir."
     )
-    draw_wrapped(d, center, (45, 687), 610, F_BODY, ink, 5, 8)
+    draw_wrapped(d, center, (45, 678), 610, F_BODY, ink, 5, 7)
 
-    d.line((40, 830, W - 40, 830), fill=ink, width=1)
-    d.text((45, 850), "Festival Watch", font=F_BODY_B, fill=ink)
+    d.line((40, 825, W - 40, 825), fill=ink, width=1)
+    d.text((45, 842), "Festival Watch", font=F_BODY_B, fill=ink)
     draw_wrapped(
         d,
         "The appearance quickly became one of the most talked-about moments of the day.",
-        (45, 882), 275, F_BODY, ink, 4, 5
+        (45, 874), 275, F_BODY, ink, 4, 5
     )
-    d.text((365, 850), "Exclusive", font=F_BODY_B, fill=ink)
+    d.text((365, 842), "Exclusive", font=F_BODY_B, fill=ink)
     draw_wrapped(
         d,
         "This edition was generated for one participant and can be opened directly by QR.",
-        (365, 882), 285, F_BODY, ink, 4, 5
+        (365, 874), 285, F_BODY, ink, 4, 5
     )
 
     stamp = Image.new("RGBA", (190, 55), (0, 0, 0, 0))
@@ -190,80 +190,3 @@ def extract_frames(video_path, frame_dir):
         raise RuntimeError("영상 프레임을 추출하지 못했습니다.")
     while len(frames) < 8:
         frames.append(frames[-1])
-    return frames[:8]
-
-def compose_gif(frame_files, output_path, name):
-    base = static_newspaper(name)
-    x1, y1, x2, y2 = PHOTO_BOX
-    target = (x2 - x1, y2 - y1)
-    pages = []
-    for fp in frame_files:
-        portrait = Image.open(fp).convert("RGB")
-        portrait = cover(portrait, target)
-        page = base.copy()
-        page.paste(portrait, (x1, y1))
-        pages.append(page.convert("P", palette=Image.Palette.ADAPTIVE, colors=128))
-    pages[0].save(
-        output_path,
-        save_all=True,
-        append_images=pages[1:],
-        duration=150,
-        loop=0,
-        disposal=2,
-        optimize=False
-    )
-
-def cloudinary_upload(gif_path):
-    endpoint = f"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/image/upload"
-    with open(gif_path, "rb") as f:
-        files = {"file": ("moving-newspaper.gif", f, "image/gif")}
-        data = {"upload_preset": UPLOAD_PRESET}
-        r = requests.post(endpoint, files=files, data=data, timeout=60)
-    if not r.ok:
-        raise RuntimeError(f"Cloudinary upload failed: {r.text}")
-    data = r.json()
-    secure = data["secure_url"]
-    download = secure.replace("/upload/", "/upload/fl_attachment/")
-    return secure, download
-
-@app.get("/health")
-def health():
-    return jsonify({
-        "ok": True,
-        "version": "text-title-v3",
-        "headline": "즐거움만수두룩 / 수리산 마법학교",
-        "photo_box": PHOTO_BOX
-    })
-
-@app.post("/generate")
-def generate():
-    if "video" not in request.files:
-        return jsonify({"error": "video 파일이 없습니다."}), 400
-
-    name = (request.form.get("name") or "").strip()[:30]
-    uid = uuid.uuid4().hex[:10]
-
-    try:
-        with tempfile.TemporaryDirectory(prefix="movingnews_") as td:
-            td = Path(td)
-            src = td / f"{uid}.webm"
-            request.files["video"].save(src)
-
-            frames_dir = td / "frames"
-            frames_dir.mkdir()
-            frames = extract_frames(src, frames_dir)
-
-            out = td / f"{uid}.gif"
-            compose_gif(frames, out, name)
-            gif_url, download_url = cloudinary_upload(out)
-
-        return jsonify({"ok": True, "gif_url": gif_url, "download_url": download_url})
-    except subprocess.CalledProcessError as e:
-        msg = e.stderr.decode("utf-8", "ignore")[-1500:] if e.stderr else str(e)
-        return jsonify({"error": "FFmpeg 처리 실패", "detail": msg}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "10000"))
-    app.run(host="0.0.0.0", port=port)
