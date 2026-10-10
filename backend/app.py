@@ -72,11 +72,11 @@ def parchment():
     for y in range(H):
         for x in range(W):
             edge = min(x, y, W-1-x, H-1-y)
-            vign = max(0, 35 - edge) * 1.0
+            vign = int(max(0, 35 - edge))
             noise = rnd.randint(-7, 7)
-            r = max(0, min(255, 222 + noise - vign))
-            g = max(0, min(255, 195 + noise - vign))
-            b = max(0, min(255, 137 + noise - vign))
+            r = int(max(0, min(255, 222 + noise - vign)))
+            g = int(max(0, min(255, 195 + noise - vign)))
+            b = int(max(0, min(255, 137 + noise - vign)))
             px[x,y] = (r,g,b)
     return img.filter(ImageFilter.GaussianBlur(0.18))
 
