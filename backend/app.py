@@ -17,7 +17,7 @@ UPLOAD_PRESET = os.environ.get("CLOUDINARY_UPLOAD_PRESET", "moving_newspaper")
 
 W, H = 700, 1000
 # Slightly smaller and more centered photo area so the moving image sits neatly inside the frame
-PHOTO_BOX = (245, 380, 455, 540)
+PHOTO_BOX = (245, 367, 455, 527)
 
 def font(size, bold=False):
     candidates = [
@@ -127,37 +127,37 @@ def static_newspaper(name=""):
     # Single-line festival headline, automatically shrunk to avoid clipping
     headline_text = "즐거움만수두룩"
     headline_font = fit_korean_font(d, headline_text, max_width=500, start_size=62, min_size=40)
-d.text(
-    (W // 2, 182),
-    headline_text,
-    font=headline_font,
-    fill=ink,
-    anchor="ma",
-    stroke_width=1,
-    stroke_fill=ink
-)
-d.text((W // 2, 235), "수리산 마법학교", font=KF_SUB, fill=ink, anchor="ma")
-d.line((165, 255, 535, 255), fill=ink, width=1)
-d.line((40, 282, W - 40, 282), fill=ink, width=1)
+    d.text(
+        (W // 2, 182),
+        headline_text,
+        font=headline_font,
+        fill=ink,
+        anchor="ma",
+        stroke_width=1,
+        stroke_fill=ink
+    )
+    d.text((W // 2, 235), "수리산 마법학교", font=KF_SUB, fill=ink, anchor="ma")
+    d.line((165, 255, 535, 255), fill=ink, width=1)
+    d.line((40, 282, W - 40, 282), fill=ink, width=1)
 
     # Side columns
-    d.text((45, 325), "Mysterious News", font=F_BODY_B, fill=ink)
-    d.line((45, 352, 195, 352), fill=ink, width=1)
+    d.text((45, 312), "Mysterious News", font=F_BODY_B, fill=ink)
+    d.line((45, 339, 195, 339), fill=ink, width=1)
     left = (
         "A remarkable figure appeared at the Surisan festival, drawing visitors "
         "into an atmosphere of magic, performance and imagination. Witnesses "
         "said the living portrait looked as if it had stepped straight out of an old newspaper."
     )
-    draw_wrapped(d, left, (45, 365), 145, F_BODY, ink, 3, 9)
+    draw_wrapped(d, left, (45, 352), 145, F_BODY, ink, 3, 9)
 
-    d.text((505, 325), "Daily Magic", font=F_BODY_B, fill=ink)
-    d.line((505, 352, 655, 352), fill=ink, width=1)
+    d.text((505, 312), "Daily Magic", font=F_BODY_B, fill=ink)
+    d.line((505, 339, 655, 339), fill=ink, width=1)
     right = (
         "Editors requested a lively pose worthy of a magical special issue. "
         "Every gesture added charm to the moving portrait and gave the page "
         "the feeling of an enchanted bulletin."
     )
-    draw_wrapped(d, right, (505, 365), 145, F_BODY, ink, 3, 9)
+    draw_wrapped(d, right, (505, 352), 145, F_BODY, ink, 3, 9)
 
     # Photo frame
     x1, y1, x2, y2 = PHOTO_BOX
@@ -165,7 +165,7 @@ d.line((40, 282, W - 40, 282), fill=ink, width=1)
 
     # Caption
     cap = f"{name} — Featured wizard at Surisan Magic School." if name else "Featured wizard at Surisan Magic School."
-    d.text((W // 2, 558), cap, font=F_CAP, fill=ink, anchor="ma")
+    d.text((W // 2, 545), cap, font=F_CAP, fill=ink, anchor="ma")
 
     # Bottom articles
     d.line((40, 610, W - 40, 610), fill=ink, width=1)
@@ -252,8 +252,8 @@ def cloudinary_upload(gif_path):
 def health():
     return jsonify({
         "ok": True,
-        "version": "text-title-v7",
-        "headline": "즐거움만수두룩 / 수리산 마법학교 (layout v7 centered)",
+        "version": "text-title-v8",
+        "headline": "즐거움만수두룩 / 수리산 마법학교 (layout v8 raised)",
         "photo_box": PHOTO_BOX
     })
 
